@@ -51,21 +51,21 @@
 
       <!-- Left hand controller -->
       <a-entity 
+        id="left-hand" 
         oculus-touch-controls="hand: left" 
+        position="0 0 0"
         raycaster="objects: .collidable" 
-        line="color: yellow; opacity: 0.5" 
-        position="-0.5 1.5 -1" 
-        id="left-hand">
+        line="color: yellow; opacity: 0.5">
         <a-sphere radius="0.1" color="yellow" position="0 0 -0.3"></a-sphere>
       </a-entity>
 
       <!-- Right hand controller -->
       <a-entity 
+        id="right-hand" 
         oculus-touch-controls="hand: right" 
+        position="0 0 0"
         raycaster="objects: .collidable" 
-        line="color: yellow; opacity: 0.5" 
-        position="0.5 1.5 -1" 
-        id="right-hand">
+        line="color: yellow; opacity: 0.5">
         <a-sphere radius="0.1" color="yellow" position="0 0 -0.3"></a-sphere>
       </a-entity>
 
