@@ -1,111 +1,44 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="utf-8">
-    <title>WebXR Cube Touch Game</title>
-    <style>
-        body { margin: 0; }
-        canvas { display: block; }
-        #vrButton {
-            position: absolute;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            padding: 12px 24px;
-            font-size: 16px;
-            cursor: pointer;
-        }
-    </style>
+    <title>A-Frame Cube Touch Game</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/aframe/1.4.2/aframe.min.js"></script>
+    <script>
+        AFRAME.registerComponent('change-color-on-touch', {
+            init: function() {
+                this.el.addEventListener('mouseenter', () => {
+                    this.el.setAttribute('material', 'color', '#00ff00');
+                });
+                
+                this.el.addEventListener('mouseleave', () => {
+                    this.el.setAttribute('material', 'color', '#808080');
+                });
+            }
+        });
+    </script>
 </head>
 <body>
-    <button id="vrButton">Enter VR</button>
-    <script type="module">
-        import * as THREE from 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.module.js';
+    <a-scene>
+        <!-- Environment -->
+        <a-sky color="#ECECEC"></a-sky>
+        <a-plane position="0 0 0" rotation="-90 0 0" width="4" height="4" color="#7BC8A4"></a-plane>
 
-        let cube;
-        const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        const renderer = new THREE.WebGLRenderer();
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        document.body.appendChild(renderer.domElement);
+        <!-- Interactive Cube -->
+        <a-box position="0 1.6 -0.5" 
+               width="0.1" 
+               height="0.1" 
+               depth="0.1" 
+               color="#808080"
+               change-color-on-touch
+               raycaster-target></a-box>
 
-        // Create cube
-        const geometry = new THREE.BoxGeometry(0.1, 0.1, 0.1); // 10cm cube
-        const material = new THREE.MeshBasicMaterial({ color: 0x808080 });
-        cube = new THREE.Mesh(geometry, material);
-        cube.position.z = -0.5; // 50cm away
-        scene.add(cube);
+        <!-- Controllers -->
+        <a-entity oculus-touch-controls="hand: left"></a-entity>
+        <a-entity oculus-touch-controls="hand: right"></a-entity>
 
-        // Add light
-        const light = new THREE.DirectionalLight(0xffffff, 1);
-        light.position.set(0, 1, 1);
-        scene.add(light);
-        scene.add(new THREE.AmbientLight(0x404040));
-
-        // Controllers setup
-        let controller1, controller2;
-        let controllerGrip1, controllerGrip2;
-
-        async function initVR() {
-            renderer.xr.enabled = true;
-
-            // Add VR button
-            document.getElementById('vrButton').addEventListener('click', () => {
-                renderer.xr.getSession() ? renderer.xr.endSession() : renderer.xr.enterSession();
-            });
-
-            // Setup controllers
-            controller1 = renderer.xr.getController(0);
-            controller2 = renderer.xr.getController(1);
-            scene.add(controller1);
-            scene.add(controller2);
-
-            // Add controller models
-            const controllerModelFactory = new XRControllerModelFactory();
-            controllerGrip1 = renderer.xr.getControllerGrip(0);
-            controllerGrip2 = renderer.xr.getControllerGrip(1);
-            
-            controllerGrip1.add(controllerModelFactory.createControllerModel(controllerGrip1));
-            controllerGrip2.add(controllerModelFactory.createControllerModel(controllerGrip2));
-            
-            scene.add(controllerGrip1);
-            scene.add(controllerGrip2);
-
-            // Animation loop
-            renderer.setAnimationLoop(render);
-        }
-
-        function checkCollision(controller) {
-            const tempMatrix = new THREE.Matrix4();
-            tempMatrix.identity().extractRotation(controller.matrixWorld);
-            
-            const raycaster = new THREE.Raycaster();
-            raycaster.ray.origin.setFromMatrixPosition(controller.matrixWorld);
-            raycaster.ray.direction.set(0, 0, -1).applyMatrix4(tempMatrix);
-            
-            const intersects = raycaster.intersectObject(cube);
-            
-            if (intersects.length > 0 && intersects[0].distance < 0.1) {
-                cube.material.color.setHex(0x00ff00); // Green
-            } else {
-                cube.material.color.setHex(0x808080); // Gray
-            }
-        }
-
-        function render() {
-            checkCollision(controller1);
-            checkCollision(controller2);
-            renderer.render(scene, camera);
-        }
-
-        // Handle window resizing
-        window.addEventListener('resize', () => {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        });
-
-        initVR();
-    </script>
+        <!-- Cursor and Raycaster -->
+        <a-entity id="rightHand" laser-controls="hand: right" raycaster="objects: [raycaster-target]"></a-entity>
+        <a-entity id="leftHand" laser-controls="hand: left" raycaster="objects: [raycaster-target]"></a-entity>
+    </a-scene>
 </body>
 </html>
