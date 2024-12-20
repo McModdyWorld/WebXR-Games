@@ -6,6 +6,7 @@
     <title>VR Cube Game with Hands</title>
     <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/aframevr/aframe-controller-component/dist/aframe-controller.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/aframe-extras@7.0.0/dist/aframe-extras.min.js"></script>
     <script>
       // Define a new A-Frame component to change the cube color on touch
       AFRAME.registerComponent('change-color-on-touch', {
@@ -22,7 +23,7 @@
     </script>
   </head>
   <body>
-    <a-scene>
+    <a-scene physics="gravity: -9.8; debug: true">
       <!-- Camera with VR capabilities -->
       <a-entity position="0 1.6 0" camera look-controls></a-entity>
 
@@ -36,7 +37,7 @@
         scale="1 1 1"
         color="red"
         change-color-on-touch="color: green"
-        static-body
+        dynamic-body
       ></a-box>
 
       <!-- Ground for interaction -->
@@ -52,9 +53,8 @@
       <!-- Left hand controller -->
       <a-entity 
         id="left-hand" 
-        oculus-touch-controls="hand: left" 
-        position="0 0 0"
-        raycaster="objects: .collidable" 
+        hand-controls="hand: left" 
+        raycaster="objects: .collidable; far: 10" 
         line="color: yellow; opacity: 0.5">
         <a-sphere radius="0.1" color="yellow" position="0 0 -0.3"></a-sphere>
       </a-entity>
@@ -62,9 +62,8 @@
       <!-- Right hand controller -->
       <a-entity 
         id="right-hand" 
-        oculus-touch-controls="hand: right" 
-        position="0 0 0"
-        raycaster="objects: .collidable" 
+        hand-controls="hand: right" 
+        raycaster="objects: .collidable; far: 10" 
         line="color: yellow; opacity: 0.5">
         <a-sphere radius="0.1" color="yellow" position="0 0 -0.3"></a-sphere>
       </a-entity>
