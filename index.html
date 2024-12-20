@@ -15,13 +15,62 @@
                 });
             }
         });
+
+        // Custom movement component
+        AFRAME.registerComponent('thumbstick-movement', {
+            init: function() {
+                this.camera = document.querySelector('#camera');
+                this.moveSpeed = 0.15; // Adjust for faster/slower movement
+            },
+            
+            tick: function() {
+                if (!this.el.components['oculus-touch-controls']) return;
+                
+                const gamepad = this.el.components['oculus-touch-controls'].controllerPresent ? 
+                    navigator.getGamepads().find(gp => gp && gp.id.includes('Oculus Touch') && gp.hand === 'right') : null;
+                
+                if (!gamepad) return;
+                
+                // Get thumbstick values
+                const x = gamepad.axes[2]; // Right/Left
+                const y = gamepad.axes[3]; // Forward/Backward
+                
+                if (Math.abs(x) > 0.1 || Math.abs(y) > 0.1) {
+                    // Get camera direction
+                    const rotation = this.camera.object3D.rotation.y;
+                    
+                    // Calculate movement vector based on camera rotation
+                    const moveX = (x * Math.cos(rotation) + y * Math.sin(rotation)) * this.moveSpeed;
+                    const moveZ = (y * Math.cos(rotation) - x * Math.sin(rotation)) * this.moveSpeed;
+                    
+                    // Update camera rig position
+                    const rig = document.querySelector('#rig');
+                    rig.object3D.position.x += moveX;
+                    rig.object3D.position.z += moveZ;
+                }
+            }
+        });
     </script>
 </head>
 <body>
     <a-scene>
         <!-- Environment -->
         <a-sky color="#ECECEC"></a-sky>
-        <a-plane position="0 0 0" rotation="-90 0 0" width="4" height="4" color="#7BC8A4"></a-plane>
+        <a-plane position="0 0 0" rotation="-90 0 0" width="20" height="20" color="#7BC8A4"></a-plane>
+        
+        <!-- Camera Rig -->
+        <a-entity id="rig" position="0 0 0">
+            <a-camera id="camera"></a-camera>
+            <a-entity id="rightHand" 
+                      oculus-touch-controls="hand: right" 
+                      thumbstick-movement
+                      laser-controls="hand: right" 
+                      raycaster="objects: [raycaster-target]"></a-entity>
+            <a-entity id="leftHand" 
+                      oculus-touch-controls="hand: left"
+                      laser-controls="hand: left" 
+                      raycaster="objects: [raycaster-target]"></a-entity>
+        </a-entity>
 
         <!-- Interactive Cube -->
         <a-box position="0 1.6 -0.5" 
@@ -32,13 +81,10 @@
                change-color-on-touch
                raycaster-target></a-box>
 
-        <!-- Controllers -->
-        <a-entity oculus-touch-controls="hand: left"></a-entity>
-        <a-entity oculus-touch-controls="hand: right"></a-entity>
-
-        <!-- Cursor and Raycaster -->
-        <a-entity id="rightHand" laser-controls="hand: right" raycaster="objects: [raycaster-target]"></a-entity>
-        <a-entity id="leftHand" laser-controls="hand: left" raycaster="objects: [raycaster-target]"></a-entity>
+        <!-- Add some reference objects -->
+        <a-cylinder position="-2 0.75 -3" radius="0.5" height="1.5" color="#FFC65D"></a-cylinder>
+        <a-sphere position="2 1.25 -5" radius="1.25" color="#7BC8A4"></a-sphere>
+        <a-box position="4 1 -2" width="2" height="2" depth="2" color="#4CC3D9"></a-box>
     </a-scene>
 </body>
 </html>
